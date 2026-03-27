@@ -1,0 +1,32 @@
+! --- MLB.TV Ad & Telemetry Filter (DNS Layer for AdGuard Home) ---
+! Version: 2025-11-01
+! Purpose: Block SSAI ad, tracking, and telemetry domains for MLB.TV
+! Safe for Onn TV, Android, and PC — DNS-only layer
+! ---------------------------------------------------------------
+! ✅ KEEP ALLOWED:
+@@||playback-heartbeat.mlb.com^
+@@||mlbstatic.com^
+@@||fastly.net^
+@@||googlevideo.com^
+
+! 🚫 TELEMETRY & AD DECISIONING
+||mlb.sc.omtrdc.net^
+||mlbadvancedmedialp.tt.omtrdc.net^
+||cws.conviva.com^
+||getpublica.com^
+||pbs.getpublica.com^
+||argo.svcmot.com^
+||cyberprotector.online^
+||flixview.apis.cyberprotector.online^
+||udm.scorecardresearch.com^
+||b.scorecardresearch.com^
+
+! 🚫 SSAI / AD MANIFEST ENDPOINTS (nullify playback ads)
+||mlb.com/api/v*/manifest*$dnsrewrite=0.0.0.0
+||mlb.com/api/v*/playback*$dnsrewrite=0.0.0.0
+||mlb.com/api/v*/content*$dnsrewrite=0.0.0.0
+
+! ℹ️ Notes:
+! - 0.0.0.0 responses indicate DNS nullification succeeded.
+! - If playback fails, check for cached IPs or QUIC bypass.
+
