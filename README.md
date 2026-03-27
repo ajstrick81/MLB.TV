@@ -1,5 +1,6 @@
 # MLB.TV
 Block, Bypass, Filter MLB.TV Ads using AdGuard
+
 This ruleset operates as a DNS-only layer via AdGuard Home (AGH) targeting MLB.TV's ad decisioning, SSAI manifest endpoints, and telemetry infrastructure — without touching core playback delivery.
 
 How it works: Rather than returning NXDOMAIN, ad decisioning and telemetry domains are null-routed using dnsrewrite=0.0.0.0, returning a valid DNS response that points to a dead address. The ad SDK and tracking infrastructure receive what appears to be a successful resolution, but all subsequent connection attempts silently fail. This prevents the aggressive retry behavior that NXDOMAIN typically triggers, keeping the player stable while the ad pipeline goes dark.
