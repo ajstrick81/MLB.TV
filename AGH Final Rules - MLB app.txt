@@ -1,66 +1,35 @@
-! ============================================================
-! MLB.TV Ad & Telemetry Filter — AGH (Flint 2 / GL-MT6000)
-! Version: 2026-04-10
-! Layer: DNS only. No path/URL matching — hostname blocking only.
-! Scope: Network-wide (all devices including Onn TV).
-!        AGP on Onn TV handles HTTPS/URL layer separately.
-! ============================================================
-
-! ✅ ALLOWLIST — critical MLB.TV playback domains
-! tv-fst.mlb.com serves SSAI-stitched streams — cannot be DNS-blocked
-! without killing the game feed entirely. Ad segment blocking is
-! handled at the URL level by AGP on the Onn TV.
+! MLB.TV Ad & Telemetry Filter (DNS Layer for AdGuard Home)
+! Version: 2026-03-26
+! Purpose: Block SSAI ad, tracking, and telemetry domains for MLB.TV
+! Safe for Onn TV, Android, and PC — DNS-only layer
+! IMPORTANT!!! - Only works with MLB app version -> (Android TV) 7.67.1.3
+! The latest version update (MLB (Android TV) 7.69.1.2)  disabled the ||dai.google.com rule rendering the app unusable
+! ---------------------------------------------------------------
+! ✅ KEEP ALLOWED (core playback infrastructure)
 @@||playback-heartbeat.mlb.com^
+@@||media-gateway.mlb.com^
+@@||mastapi.mobile.mlbinfra.com^
+@@||tv-fst.mlb.com^
 @@||mlbstatic.com^
 @@||fastly.net^
 @@||googlevideo.com^
-@@||tv-fst.mlb.com^
-
-
-! ---------------------------------------------------------------
-! 🚫 AD DECISIONING & SUPPLY CHAIN
-! ---------------------------------------------------------------
-||getpublica.com^
-||pbs.getpublica.com^
-||argo.svcmot.com^
-||cyberprotector.online^
-||flixview.apis.cyberprotector.online^
-
-
-! ---------------------------------------------------------------
-! 🚫 TELEMETRY & MEASUREMENT
-! ---------------------------------------------------------------
+! 🚫 GOOGLE DAI / IMA (SSAI ad stitching — high risk, test first)
+||dai.google.com^
+! 🚫 TELEMETRY & AD DECISIONING
+||tv-fst.mlb.com/*/AD*.m3u8$redirect=nooptext
 ||mlb.sc.omtrdc.net^
 ||mlbadvancedmedialp.tt.omtrdc.net^
 ||cws.conviva.com^
+||getpublica.com^
+||pbs.getpublica.com^
+||argo.svcmot.com^
 ||udm.scorecardresearch.com^
 ||b.scorecardresearch.com^
+||dpm.demdex.net^
+||firebaselogging-pa.googleapis.com^
+||0.datadog.pool.ntp.org^
+! 🚫 ADDITIONAL TRACKING (from live log 2026-03-26)
+||app-measurement.com^
 ||browser-intake-us5-datadoghq.com^
-||browser-intake-*-datadoghq.com^
-
-
+! ❌ REMOVED: Path-based dnsrewrite rules (non-functional at DNS layer)
 ! ---------------------------------------------------------------
-! 🚫 IMPRESSION & CLICK BEACONS (Google IMA SDK)
-! Confirmed 120+ blocked hits in filtering log.
-! Wildcard covers gvt2/gvt3 beacon subdomains.
-! ---------------------------------------------------------------
-||beacons.gcp.gvt2.com^
-||beacons.gvt2.com^
-||beacons2.gvt2.com^
-||beacons3.gvt2.com^
-||beacons4.gvt2.com^
-||beacons5.gvt2.com^
-||beacons5.gvt3.com^
-||ogads-pa.clients6.google.com^
-
-
-! ---------------------------------------------------------------
-! ℹ️ NOTES
-! ---------------------------------------------------------------
-! - DNS layer cannot target URL paths. The old ruleset included
-!     ||mlb.com/api/v*/manifest* with $dnsrewrite — these were
-!     invalid and have been removed. AGH ignores path components.
-! - tv-fst.mlb.com is explicitly allowed: ad segment blocking
-!     requires URL-path awareness (AGP's job, not AGH's).
-! - If a new ad domain appears in AGH query logs, add it here.
-!     Look for domains with 0 legitimate MLB content associations.
