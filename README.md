@@ -1,4 +1,8 @@
 # MLB.TV
+IMPORTANT!!! - Only works with MLB app version -> (Android TV) 7.67.1.3
+
+The latest version update on 4/6/26 (MLB (Android TV) 7.69.1.2)  disabled the ||dai.google.com rule rendering the app unusable
+
 Block, Bypass, Filter MLB.TV Ads using AdGuard
 
 This ruleset operates as a DNS-only layer via AdGuard Home (AGH) targeting MLB.TV's ad decisioning, SSAI manifest endpoints, and telemetry infrastructure — without touching core playback delivery.
