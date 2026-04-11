@@ -1,0 +1,85 @@
+! ============================================================
+! MLB.TV Ad & Telemetry Filter — AGP (Onn TV / Android)
+! Version: 2026-04-10
+! Layer: HTTPS filtering (URL-level). AGP DNS protection must
+!        be DISABLED — AGH on Flint 2 handles DNS network-wide.
+! ============================================================
+
+! ✅ ALLOWLIST — critical MLB.TV playback infrastructure
+! (Ensures these are never caught by broad rules)
+@@||tv-fst.mlb.com^$important
+@@||playback-heartbeat.mlb.com^$important
+@@||mlbstatic.com^$important
+@@||fastly.net^$important
+@@||googlevideo.com^$important
+
+
+! ---------------------------------------------------------------
+! 🚫 SSAI AD SEGMENTS — EVI (Enhanced Video Insertion)
+! tv-fst.mlb.com serves both live game segments AND ad segments.
+! The -AD- marker in the path cleanly identifies inserted ad content.
+! ---------------------------------------------------------------
+
+! Ad variant playlist (without this the player can't queue segments)
+||tv-fst.mlb.com/*/AD*.m3u8$redirect=nooptext
+
+! Ad video segments — noopmp4-1s returns a 1s blank frame
+! instead of a hard block, reducing player stall risk
+||tv-fst.mlb.com/*/AD*.ts$redirect=noopmp4-1s
+
+! Ad caption/subtitle track
+||tv-fst.mlb.com/*/AD*.vtt$redirect=nooptext
+
+
+! ---------------------------------------------------------------
+! 🚫 AD DECISIONING & MANIFEST APIs
+! ---------------------------------------------------------------
+||getpublica.com^
+||pbs.getpublica.com^
+||argo.svcmot.com^
+
+
+! ---------------------------------------------------------------
+! 🚫 TELEMETRY & TRACKING (HTTPS layer catch)
+! These may slip past DNS if the app resolves them early or caches.
+! AGP intercepts the actual HTTPS requests as a secondary net.
+! ---------------------------------------------------------------
+||cws.conviva.com^
+||*.cws.conviva.com^
+||mlb.sc.omtrdc.net^
+||mlbadvancedmedialp.tt.omtrdc.net^
+||udm.scorecardresearch.com^
+||b.scorecardresearch.com^
+||browser-intake-us5-datadoghq.com^
+||cyberprotector.online^
+||*.cyberprotector.online^
+
+
+! ---------------------------------------------------------------
+! 🚫 IMPRESSION / CLICK BEACONS
+! Confirmed in filtering log: 120 blocked hits across gvt2/gvt3.
+! These are Google IMA SDK beacons fired during ad playback.
+! ---------------------------------------------------------------
+||beacons.gcp.gvt2.com^
+||beacons.gvt2.com^
+||beacons2.gvt2.com^
+||beacons3.gvt2.com^
+||beacons4.gvt2.com^
+||beacons5.gvt2.com^
+||beacons5.gvt3.com^
+||ogads-pa.clients6.google.com^
+
+
+! ---------------------------------------------------------------
+! ℹ️ NOTES
+! ---------------------------------------------------------------
+! - If playback stalls during ad breaks, relax the .ts rule first:
+!     comment out the AD*.ts line and test with only AD*.m3u8 blocked.
+! - The "Commercial Break in Progress" slate is client-side JS
+!     triggered by HLS cue points — it will still appear for the
+!     break duration even with ads blocked. This is expected behavior.
+! - If MLB app uses QUIC (UDP/443), AGP HTTPS filtering is bypassed.
+!     Check AGP filtering log for unfiltered MLB requests as a signal.
+! - Certificate pinning in the MLB Android app could also bypass
+!     HTTPS filtering. If the AD*.ts rule fires 0 times in the log,
+!     pinning or QUIC is likely the culprit.
