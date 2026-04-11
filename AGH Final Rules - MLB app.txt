@@ -1,30 +1,66 @@
-! --- MLB.TV Ad & Telemetry Filter (DNS Layer for AdGuard Home) ---
-! Version: 2025-11-01
-! Purpose: Block SSAI ad, tracking, and telemetry domains for MLB.TV
-! Safe for Onn TV, Android, and PC — DNS-only layer
-! ---------------------------------------------------------------
-! ✅ KEEP ALLOWED:
+! ============================================================
+! MLB.TV Ad & Telemetry Filter — AGH (Flint 2 / GL-MT6000)
+! Version: 2026-04-10
+! Layer: DNS only. No path/URL matching — hostname blocking only.
+! Scope: Network-wide (all devices including Onn TV).
+!        AGP on Onn TV handles HTTPS/URL layer separately.
+! ============================================================
+
+! ✅ ALLOWLIST — critical MLB.TV playback domains
+! tv-fst.mlb.com serves SSAI-stitched streams — cannot be DNS-blocked
+! without killing the game feed entirely. Ad segment blocking is
+! handled at the URL level by AGP on the Onn TV.
 @@||playback-heartbeat.mlb.com^
 @@||mlbstatic.com^
 @@||fastly.net^
 @@||googlevideo.com^
+@@||tv-fst.mlb.com^
 
-! 🚫 TELEMETRY & AD DECISIONING
-||mlb.sc.omtrdc.net^
-||mlbadvancedmedialp.tt.omtrdc.net^
-||cws.conviva.com^
+
+! ---------------------------------------------------------------
+! 🚫 AD DECISIONING & SUPPLY CHAIN
+! ---------------------------------------------------------------
 ||getpublica.com^
 ||pbs.getpublica.com^
 ||argo.svcmot.com^
 ||cyberprotector.online^
 ||flixview.apis.cyberprotector.online^
+
+
+! ---------------------------------------------------------------
+! 🚫 TELEMETRY & MEASUREMENT
+! ---------------------------------------------------------------
+||mlb.sc.omtrdc.net^
+||mlbadvancedmedialp.tt.omtrdc.net^
+||cws.conviva.com^
 ||udm.scorecardresearch.com^
 ||b.scorecardresearch.com^
+||browser-intake-us5-datadoghq.com^
+||browser-intake-*-datadoghq.com^
 
-! 🚫 SSAI / AD MANIFEST ENDPOINTS (nullify playback ads)
-||tv-fst.mlb.com/*/AD*.m3u8$redirect=nooptext
 
-! ℹ️ Notes:
-! - 0.0.0.0 responses indicate DNS nullification succeeded.
-! - If playback fails, check for cached IPs or QUIC bypass.
+! ---------------------------------------------------------------
+! 🚫 IMPRESSION & CLICK BEACONS (Google IMA SDK)
+! Confirmed 120+ blocked hits in filtering log.
+! Wildcard covers gvt2/gvt3 beacon subdomains.
+! ---------------------------------------------------------------
+||beacons.gcp.gvt2.com^
+||beacons.gvt2.com^
+||beacons2.gvt2.com^
+||beacons3.gvt2.com^
+||beacons4.gvt2.com^
+||beacons5.gvt2.com^
+||beacons5.gvt3.com^
+||ogads-pa.clients6.google.com^
 
+
+! ---------------------------------------------------------------
+! ℹ️ NOTES
+! ---------------------------------------------------------------
+! - DNS layer cannot target URL paths. The old ruleset included
+!     ||mlb.com/api/v*/manifest* with $dnsrewrite — these were
+!     invalid and have been removed. AGH ignores path components.
+! - tv-fst.mlb.com is explicitly allowed: ad segment blocking
+!     requires URL-path awareness (AGP's job, not AGH's).
+! - If a new ad domain appears in AGH query logs, add it here.
+!     Look for domains with 0 legitimate MLB content associations.
