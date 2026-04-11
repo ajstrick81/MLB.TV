@@ -22,9 +22,7 @@
 ||b.scorecardresearch.com^
 
 ! 🚫 SSAI / AD MANIFEST ENDPOINTS (nullify playback ads)
-||mlb.com/api/v*/manifest*$dnsrewrite=0.0.0.0
-||mlb.com/api/v*/playback*$dnsrewrite=0.0.0.0
-||mlb.com/api/v*/content*$dnsrewrite=0.0.0.0
+||tv-fst.mlb.com/*/AD*.m3u8$redirect=nooptext
 
 ! ℹ️ Notes:
 ! - 0.0.0.0 responses indicate DNS nullification succeeded.
